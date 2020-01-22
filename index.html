@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Mensurations</title>
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<!-- 	<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous"> -->
+</head>
+<body>
+
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="row">
+				<div class="col-md-3 offset-md-3">
+					Mensurations
+					<br>
+					<select id="measure" name="measure" class="form-control">
+						<option value="">Toute</option>
+						<option value="Poids">Poids</option>
+						<option value="Taille">Taille</option>
+						<option value="Hanche">Hanche</option>
+						<option value="Cuisse">Cuisse</option>
+						<option value="Poitrine">Poitrine</option>
+						<option value="Bras">Bras</option>
+					</select>
+				</div>
+				<div class="col-md-3">
+					Depuis
+					<br>
+					<select id="nDays" name="nDays" class="form-control">
+						<option value="28">28 jours</option>
+						<option value="60">60 jours</option>
+						<option value="365">365 jours</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-12">
+			<figure class="highcharts-figure">
+                <div id="container" style="width:100%;height:650px;"></div>
+            </figure>
+		</div>
+	</div>
+	<br>
+	<div class="table-responsive">
+		<table class="table table-display table-vtop measurements_table">
+			<thead>
+				<tr>
+					<th>Poids</th>
+					<th>Poitrine</th>
+					<th>Taille</th>
+					<th>Hanche</th>
+					<th>Bras</th>
+					<th>Cuisse</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+	<br>
+	<div class="row">
+		<div class="col-md-12 text-center">
+			<button type="button" id="add_btn" class="btn btn-lg btn-danger"><< AJOUTER DES MENSURATIONS >></button>
+		</div>
+	</div>
+	<br>
+	<br>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js" integrity="sha256-4iQZ6BVL4qNKlQ27TExEhBN1HFPvAvAMbFavKKosSWQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment-with-locales.min.js" integrity="sha256-AdQN98MVZs44Eq2yTwtoKufhnU+uZ7v2kXnD5vqzZVo=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/fr.js" integrity="sha256-D0tqyrTQHDExvGYoi+kyInjV47fm30M5qq4whUrMuuE=" crossorigin="anonymous"></script>
+<script src="js/highcharts.js"></script>
+<script src="js/exporting.js"></script>
+
+<script type="text/javascript">
+    $(function () {
+        //init graph options
+            var options = {
+                    chart: {
+                        renderTo: 'container',
+                         type: 'line',
+                         style:{
+                             width:'100%',
+                             height:'100%'
+                         },
+                    },
+                    legend: {
+                        layout: 'horizontal',
+                        align: 'center',
+                        verticalAlign: 'top',
+                        itemMarginTop: 15   
+                    },
+                title: {
+                	margin: 15, 
+                	text: 'Mensurations'
+                },
+                credits: {
+  					enabled: false
+                },
+                exporting: { enabled: false },
+               xAxis: { 
+                   categories: [],
+                   title: {
+                       text: 'Date'
+                   } 
+               },
+    			   yAxis: {
+                    min: 30,
+                    max:160,
+                    tickInterval: 10,
+                    title: {
+                        text: 'Taille'
+                    }
+                },
+    			plotOptions: {
+    	            series: {
+    	                cursor: 'pointer',
+    	            }
+    			},
+    			tooltip: 
+                {
+    				formatter: function() 
+    				{
+    					var s = '<b>'+ this.x +'</b>',
+						sum = 0;
+    					s += '<table width=100>'
+
+   						point = this;
+    					//$.each(this.points, function(i, point)
+    					//{
+        					if(point.series.name == "Poids")
+            					var unit = "Kg";
+        					else
+        						var unit = "cm";
+    						
+    						s += '<tr><td style="color:' + point.series.color + ';padding:0">' + point.series.name  + ': </td>';	
+    						s += '<td style="padding:0, font-size:10px; font-face: arial;" align="right"><b>' + point.y + '</b>&nbsp;' + unit + '</td></tr>';						
+    						sum += point.y;
+    					//});
+
+    					return s;
+    				},
+
+    				shared: false,
+    				useHTML: true
+    			},
+                series: [{
+                    name: 'Poids',
+                    data: [],
+                    color:'orange'
+                }, {
+                    name: 'Poitrine',
+                    data: [],
+                    color:'yellow'
+                }, {
+                    name: 'Taille',
+                    data: [],
+                    color:'blue'
+                }, {
+                    name: 'Hanche',
+                    data: [],
+                    color:'violet'
+                }, {
+                    name: 'Bras',
+                    data: [],
+                    color:'green'
+                }, {
+                    name: 'Cuisse',
+                    data: [],
+                    color:'lightgreen'
+                }]
+			};
+
+		//refresh graph
+        window.chart = new Highcharts.Chart(options);
+
+        //get previous days graph data
+        GetPreviousData(options, chart);
+
+		$(document).on("change","#nDays",function(){
+			//rebuild data for previous days
+			$(".measurements_table tbody tr").remove();
+			GetPreviousData(options, chart);
+// 			options = GetPreviousData(options);
+// 			chart = new Highcharts.Chart(options);
+		});
+
+		$(document).on("change",".field",function(){
+			//get row, column and data of changed value
+			var nRowIndex =  $(this).parent().parent().index();
+			var nColumnIndex = $(this).parent().index();
+			var value = $(".measurements_table tbody tr").eq(nRowIndex).find("td").eq(nColumnIndex).find('input').val();
+			var fieldDate = $(".measurements_table tbody tr").eq(nRowIndex).find("td").eq(0).find('.current_date').html();
+			fieldDate = moment(fieldDate, 'ddd Do MMM YYYY').format('L');
+			if(!value || value == "")
+				value = 0;
+			else
+				value = parseFloat(value);
+			if(parseInt(value) || parseFloat(value)){}
+			else {$(".measurements_table tbody tr").eq(nRowIndex).find("td").eq(nColumnIndex).find('input').val(0); value = 0;}
+			var nRowCount = $(".measurements_table tbody tr").length;
+			nRowCount--;
+
+			//show data on graph
+// 			for(var i = 0; i < $(".measurements_table tbody tr").eq(nRowIndex).find("td").length; i++){
+				if(!nRowCount)
+					if(!options.series[nColumnIndex].data.length)
+						options.series[nColumnIndex].data.push(value);
+					else
+						options.series[nColumnIndex].data[nRowIndex] = value;
+				else{
+						options.series[nColumnIndex].data[nRowIndex] = value;
+				}
+// 			}
+// 			console.log(options.series);
+
+			//save and store data
+			var arrData = [];
+			$(".measurements_table tbody tr").eq(nRowIndex).find("td").each(function(){
+				arrData.push($(this).find('input').val());
+			});
+// 			localStorage.setItem(fieldDate, JSON.stringify(arrData));
+			localStorage.setItem(fieldDate, arrData);
+
+			//refresh graph
+			chart = new Highcharts.Chart(options);
+		});
+		
+		$(document).on("change","#measure",function(){
+			chart = new Highcharts.Chart(options);
+			//show all values
+			if($(this).val() == "")
+				for(var i = 0; i < chart.series.length; i++)
+					chart.series[i].show();
+			else{
+				//show required value and hide others
+				for(var i = 0; i < chart.series.length; i++){
+					if($(this).val() == chart.series[i].name)
+						chart.series[i].show();
+					else
+						chart.series[i].hide();
+				}
+			}
+		});
+
+		
+		$(document).on("click","#add_btn",function(){
+			//get today date
+			var currentDate = moment().format('ddd Do MMM YYYY');
+			var formattedDate = moment().format('L');
+			var index = $(".measurements_table tbody tr").length;
+			index++;
+
+			//build new rows
+			var html = InsertRow(index);
+			var arrData = [];
+			
+			//add graph dates
+			options.xAxis.categories.push(formattedDate);
+
+			//add new table row
+			$(".measurements_table tbody").append(html);
+			$(".measurements_table tbody tr:last-child .current_date").html(currentDate);
+
+			//if previous data exists
+			if(localStorage.getItem(formattedDate)){
+				arrData = localStorage.getItem(formattedDate);
+    			arrData = arrData.split(",").map(Number);
+    			
+    			for(var i = 0; i < arrData.length; i++)
+    				$(".measurements_table tbody tr:last-child").find('td').eq(i).find('input').val(arrData[i]);
+
+    			//add graph data
+        		for(var i = 0; i < options.series.length; i++)
+        			options.series[i].data.push(arrData[i]);
+			}
+			else{
+   				$(".measurements_table tbody tr:last-child td input").val(0);
+
+    			//add graph data
+        		for(var i = 0; i < options.series.length; i++)
+        			options.series[i].data.push(0);
+			}
+
+// 			var nRowIndex =  $(this).parent().parent().index();
+// 			for(var i = 0; i < options.series.length; i++)
+// 				options.series[i].data.push(0);
+
+			//refresh graph
+			chart = new Highcharts.Chart(options);
+		});
+            
+    });
+
+    function InsertRow(nIndex){
+        //empty row
+		var html = '<tr data-id="' + nIndex + '">';
+		html += '<td>';
+			html += '<small class="current_date">Jan 20, 2020</small>';
+			html += '<br>';
+			html += '<input type="number" min="0" step="1" name="Poids" class="form-control field"  value="0" />';
+		html += '</td>';
+		html += '<td>';
+			html += '<br>';
+			html += '<input type="number" min="0" step="1" name="Poitrine" class="form-control field" value="0" />';
+		html += '</td>';
+									html += '<td>';
+										html += '<br>';
+											html += '<input type="number" min="0" step="1" name="Taille" class="form-control field" value="0" />';
+												html += '</td>';
+													html += '<td>';
+														html += '<br>';
+															html += '<input type="number" min="0" step="1" name="Hanche" class="form-control field" value="0" />';
+																html += '</td>';
+																	html += '<td>';
+																		html += '<br>';
+																			html += '<input type="number" min="0" step="1" name="Bras" class="form-control field" value="0" />';
+																				html += '</td>';
+																					html += '<td>';
+																						html += '<br>';
+																							html += '<input type="number" min="0" step="1" name="Cuisse" class="form-control field" value="0" />';
+																								html += '</td>';
+																									html += '</tr>';
+
+		return html;
+    }
+
+    function GetPreviousData(options, chart){
+        //reset graph
+    	options.xAxis.categories = [];
+		for(var i = 0; i < options.series.length; i++)
+			options.series[i].data = [];
+
+    	//add new dates on graph and table lines
+        for(var i = $("#nDays").val(); i > 0; i-- ){
+			var previousGraphDate = moment().subtract(i, 'days').format('L');
+			var previousTableDate = moment().subtract(i, 'days').format('ddd Do MMM YYYY');
+			var index = $(".measurements_table tbody tr").length;
+			var arrData = [];
+
+			if(localStorage.getItem(previousGraphDate)){
+// 				arrData = JSON.parse(localStorage.getItem(previousGraphDate));
+				arrData = localStorage.getItem(previousGraphDate);
+    			options.xAxis.categories.push(previousGraphDate);
+    
+    			index++;
+    			var html = InsertRow(index);
+    			$(".measurements_table tbody").append(html);
+    			$(".measurements_table tbody tr:last-child .current_date").html(previousTableDate);
+
+    			arrData = arrData.split(",").map(Number);
+    			for(var i = 0; i < arrData.length; i++)
+    				$(".measurements_table tbody tr:last-child").find('td').eq(i).find('input').val(arrData[i]);
+
+        		for(var i = 0; i < options.series.length; i++)
+        			options.series[i].data.push(arrData[i]);
+			}
+        }
+
+    	//add new data lines on graph
+//     	for(var j = 0; j < $("#nDays").val(); j++)
+//     		for(var i = 0; i < options.series.length; i++)
+//     			options.series[i].data.push(0);
+
+    	//refresh graph
+        chart = new Highcharts.Chart(options);
+    }
+</script>
+
+
+</body>
+</html>
